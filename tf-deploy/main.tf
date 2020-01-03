@@ -12,7 +12,7 @@ variable "subnet_id" {}
 resource "aws_security_group" "test" {
   name        = "test-sg"
   description = "Test SG"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
 }
 
 resource "aws_security_group_rule" "test_ingress_ssh" {
@@ -34,10 +34,10 @@ resource "aws_security_group_rule" "test_egress_all" {
 
 
 resource "aws_instance" "test" {
-  ami                         = "${var.ami_id}"
-  instance_type               = "${var.instance_type}"
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
   vpc_security_group_ids      = ["${aws_security_group.test.id}"]
-  subnet_id                   = "${var.subnet_id}"
+  subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   tags = {
     Name = "HelloWorld"
