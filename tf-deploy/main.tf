@@ -40,10 +40,13 @@ resource "aws_instance" "test" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   tags = {
-    Name = "HelloWorld"
+    Name = "scan-vm"
   }
 }
 
 output "instance_public_ip" {
 	value = aws_instance.test.public_ip
+}
+output "instance_id" {
+	value = aws_instance.test.id
 }
