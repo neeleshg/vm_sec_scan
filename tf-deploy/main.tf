@@ -21,7 +21,7 @@ resource "aws_security_group_rule" "test_ingress_ssh" {
   to_port         = 22
   protocol        = "tcp"
   cidr_blocks     = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.test.id}"
+  security_group_id = aws_security_group.test.id
 }
 resource "aws_security_group_rule" "test_egress_all" {
   type            = "egress"
@@ -29,14 +29,14 @@ resource "aws_security_group_rule" "test_egress_all" {
   to_port         = 0
   protocol        = "-1"
   cidr_blocks     = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.test.id}"
+  security_group_id = aws_security_group.test.id
 }
 
 
 resource "aws_instance" "test" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
-  vpc_security_group_ids      = ["${aws_security_group.test.id}"]
+  vpc_security_group_ids      = [aws_security_group.test.id]
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   tags = {
@@ -45,5 +45,5 @@ resource "aws_instance" "test" {
 }
 
 output "instance_public_ip" {
-	value = "${aws_instance.test.public_ip}"
+	value = aws_instance.test.public_ip
 }
