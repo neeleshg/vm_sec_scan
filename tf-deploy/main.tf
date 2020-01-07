@@ -10,7 +10,6 @@ variable "ec2_key_name" {}
 variable "scanner_ip_ranges" {
   type = list(string)
 }
-variable "private_instance_ip" {}
 
 resource "aws_security_group" "test" {
   name        = "test-sg"

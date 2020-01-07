@@ -27,7 +27,7 @@ pipeline {
                 def ami_id = sh (script: "grep us-east-1 /tmp/${env.BUILD_NUMBER}_packer_build.log|awk -F': ' '{print \$2}'", returnStdout: true).trim()
                 echo "AMI ID is ${ami_id}"
                 sh("cd tf-deploy && terraform init")
-                sh("cd tf-deploy && terraform apply -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}' -var 'private_instance_ip=${private_instance_ip}'" >/tmp/${env.BUILD_NUMBER}_tf_deploy.log")
+                sh("cd tf-deploy && terraform apply -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}'" >/tmp/${env.BUILD_NUMBER}_tf_deploy.log")
             }
          }
       }
@@ -35,7 +35,7 @@ pipeline {
          steps {
             // Scan Instance
             script {
-                def instance_pub_ip = sh (script: "grep 'instance_public_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'|sed 's/...\$//'", returnStdout: true).trim()
+                def instance_pub_ip = sh (script: "grep 'instance_public_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'", returnStdout: true).trim()
                 def instance_priv_ip = sh (script: "grep 'instance_private_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'", returnStdout: true).trim()
                 echo "Public IP of instance is ${instance_pub_ip}"
                 echo "Private IP of instance is ${instance_priv_ip}"
