@@ -35,13 +35,13 @@ pipeline {
          steps {
             // Scan Instance
             script {
-                def instance_pub_ip = sh (script: "grep 'instance_public_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'", returnStdout: true).trim()
+                def instance_pub_ip = sh (script: "grep 'instance_public_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'|sed 's/...\$//'", returnStdout: true).trim()
                 def instance_priv_ip = sh (script: "grep 'instance_private_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'", returnStdout: true).trim()
                 echo "Public IP of instance is ${instance_pub_ip}"
                 echo "Private IP of instance is ${instance_priv_ip}"
                 withCredentials([usernamePassword(credentialsId: 'Qualys-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
-                  sh(curl -H "X-Requested-With: Curl Sample" -u "$user:$pass" -X "POST" -d "action=add&enable_vm=1&ips=${instance_pub_ip}" "https://qualysapi.qg1.apps.qualys.in/api/2.0/fo/asset/ip/")
-                }        
+                  sh("curl -H 'X-Requested-With: Curl Sample' -u 'neees8ng1:Whale@2012' -X 'POST' -d 'action=add&enable_vm=1&ips=${instance_pub_ip}' 'https://qualysapi.qg1.apps.qualys.in/api/2.0/fo/asset/ip/'")
+                }
                 qualysVulnerabilityAnalyzer apiServer: 'https://qualysapi.qg1.apps.qualys.in', bySev: 5, credsId: 'Qualys - Free Trial', failBySev: true, hostIp: "${instance_pub_ip}", optionProfile: 'new-ec2-access-profile', pollingInterval: '2', scanName: '[job_name]_jenkins_build_[build_number]', scannerName: 'External', useHost: true, vulnsTimeout: '60*2'
             }
          }
