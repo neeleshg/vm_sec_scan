@@ -1,7 +1,5 @@
 provider "aws" {
   region = "us-east-1"
-  shared_credentials_file = "~/.aws/creds"
-  profile                 = "unixgeek"
 }
 
 variable "ami_id" {}
@@ -10,7 +8,7 @@ variable "vpc_id" {}
 variable "subnet_id" {}
 variable "ec2_key_name" {}
 variable "scanner_ip_ranges" {
-  type = "list"
+  type = list(string)
 }
 
 resource "aws_security_group" "test" {
@@ -24,7 +22,7 @@ resource "aws_security_group_rule" "test_ingress_ssh" {
   from_port       = 22
   to_port         = 22
   protocol        = "tcp"
-  source_security_group_id     = var.scanner_sg_id
+  cidr_blocks     = ["0.0.0.0/0"]
   security_group_id = aws_security_group.test.id
 }
 
@@ -33,7 +31,7 @@ resource "aws_security_group_rule" "test_ingress_scanner" {
   from_port       = 0
   to_port         = 0
   protocol        = "-1"
-  cidr_blocks     = [var.scanner_ip_ranges]
+  cidr_blocks     = var.scanner_ip_ranges
   security_group_id = aws_security_group.test.id
 }
 
