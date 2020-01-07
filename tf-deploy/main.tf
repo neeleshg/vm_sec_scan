@@ -8,6 +8,8 @@ variable "ami_id" {}
 variable "instance_type" {}
 variable "vpc_id" {}
 variable "subnet_id" {}
+variable "ec2_key_name" {}
+variable "scanner_sg_id" {}
 
 resource "aws_security_group" "test" {
   name        = "test-sg"
@@ -20,9 +22,29 @@ resource "aws_security_group_rule" "test_ingress_ssh" {
   from_port       = 22
   to_port         = 22
   protocol        = "tcp"
+  source_security_group_id     = var.scanner_sg_id
+  security_group_id = aws_security_group.test.id
+}
+
+resource "aws_security_group_rule" "test_ingress_scanner" {
+  type            = "ingress"
+  from_port       = 0
+  to_port         = 0
+  protocol        = "-1"
   cidr_blocks     = ["0.0.0.0/0"]
   security_group_id = aws_security_group.test.id
 }
+
+
+resource "aws_network_interface" "foo" {
+  subnet_id   = var.subnet_id
+  private_ips = ["172.31.11.105"]
+
+  tags = {
+    Name = "primary_network_interface"
+  }
+}
+
 resource "aws_security_group_rule" "test_egress_all" {
   type            = "egress"
   from_port       = 0
@@ -33,12 +55,18 @@ resource "aws_security_group_rule" "test_egress_all" {
 }
 
 
+
+
 resource "aws_instance" "test" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.test.id]
-  subnet_id                   = var.subnet_id
   associate_public_ip_address = true
+  key_name                    = var.ec2_key_name
+  network_interface {
+    network_interface_id = aws_network_interface.foo.id
+    device_index         = 0
+  }
   tags = {
     Name = "scan-vm"
   }
