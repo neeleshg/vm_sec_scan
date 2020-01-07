@@ -10,6 +10,7 @@ variable "ec2_key_name" {}
 variable "scanner_ip_ranges" {
   type = list(string)
 }
+variable "private_instance_ip" {}
 
 resource "aws_security_group" "test" {
   name        = "test-sg"
@@ -48,22 +49,36 @@ resource "aws_security_group_rule" "test_egress_all" {
 
 
 
+resource "aws_network_interface" "foo" {
+  subnet_id   = var.subnet_id
+  private_ips = [ var.private_instance_ip ]
+  security_groups = [ aws_security_group.test.id  ]
+
+  tags = {
+    Name = "primary_network_interface"
+  }
+}
+
+resource "aws_eip" "eip1" {
+  network_interface = aws_network_interface.foo.id
+  vpc      = true
+}
 
 resource "aws_instance" "test" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   key_name                    = var.ec2_key_name
-  subnet_id                   = var.subnet_id
-  associate_public_ip_address = true
-  vpc_security_group_ids      = [ aws_security_group.test.id  ]
-
+  network_interface {
+    network_interface_id = aws_network_interface.foo.id
+    device_index         = 0
+  }
   tags = {
     Name = "scan-vm"
   }
 }
 
 output "instance_public_ip" {
-	value = aws_instance.test.public_ip
+	value = aws_eip.eip1.public_ip
 }
 output "instance_private_ip" {
 	value = aws_instance.test.private_ip
