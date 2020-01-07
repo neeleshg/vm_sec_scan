@@ -50,7 +50,6 @@ resource "aws_security_group_rule" "test_egress_all" {
 
 resource "aws_network_interface" "foo" {
   subnet_id   = var.subnet_id
-  private_ips = [ var.private_instance_ip ]
   security_groups = [ aws_security_group.test.id  ]
 
   tags = {

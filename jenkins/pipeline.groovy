@@ -27,7 +27,7 @@ pipeline {
                 def ami_id = sh (script: "grep us-east-1 /tmp/${env.BUILD_NUMBER}_packer_build.log|awk -F': ' '{print \$2}'", returnStdout: true).trim()
                 echo "AMI ID is ${ami_id}"
                 sh("cd tf-deploy && terraform init")
-                sh("cd tf-deploy && terraform apply -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}'" >/tmp/${env.BUILD_NUMBER}_tf_deploy.log")
+                sh("cd tf-deploy && terraform apply -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}' >/tmp/${env.BUILD_NUMBER}_tf_deploy.log")
             }
          }
       }
@@ -39,6 +39,9 @@ pipeline {
                 def instance_priv_ip = sh (script: "grep 'instance_private_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'", returnStdout: true).trim()
                 echo "Public IP of instance is ${instance_pub_ip}"
                 echo "Private IP of instance is ${instance_priv_ip}"
+                withCredentials([usernamePassword(credentialsId: 'Qualys-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                  sh(curl -H "X-Requested-With: Curl Sample" -u "$user:$pass" -X "POST" -d "action=add&enable_vm=1&ips=${instance_pub_ip}" "https://qualysapi.qg1.apps.qualys.in/api/2.0/fo/asset/ip/")
+                }        
                 qualysVulnerabilityAnalyzer apiServer: 'https://qualysapi.qg1.apps.qualys.in', bySev: 5, credsId: 'Qualys - Free Trial', failBySev: true, hostIp: "${instance_pub_ip}", optionProfile: 'new-ec2-access-profile', pollingInterval: '2', scanName: '[job_name]_jenkins_build_[build_number]', scannerName: 'External', useHost: true, vulnsTimeout: '60*2'
             }
          }
