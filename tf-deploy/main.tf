@@ -40,6 +40,7 @@ resource "aws_security_group_rule" "test_ingress_scanner" {
 resource "aws_network_interface" "foo" {
   subnet_id   = var.subnet_id
   private_ips = [var.private_instance_ip]
+  security_groups = [ aws_security_group.test.id  ]
 
   tags = {
     Name = "primary_network_interface"
@@ -61,7 +62,6 @@ resource "aws_security_group_rule" "test_egress_all" {
 resource "aws_instance" "test" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
-  vpc_security_group_ids      = [aws_security_group.test.id]
   key_name                    = var.ec2_key_name
   network_interface {
     network_interface_id = aws_network_interface.foo.id
