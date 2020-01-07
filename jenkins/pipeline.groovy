@@ -36,7 +36,10 @@ pipeline {
             // Scan Instance
             script {
                 def instance_pub_ip = sh (script: "grep 'instance_public_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'|sed 's/...\$//'", returnStdout: true).trim()
+                def instance_priv_ip = sh (script: "grep 'instance_private_ip =' /tmp/${env.BUILD_NUMBER}_tf_deploy.log|awk -F'= ' '{print \$2}'|sed 's/...\$//'", returnStdout: true).trim()
                 echo "Public IP of instance is ${instance_pub_ip}"
+                echo "Private IP of instance is ${instance_priv_ip}"
+                qualysVulnerabilityAnalyzer apiServer: 'https://qualysapi.qg1.apps.qualys.in', bySev: 5, credsId: 'Qualys - Free Trial', failBySev: true, hostIp: "${instance_priv_ip}", optionProfile: 'new-ec2-access-profile', pollingInterval: '2', scanName: '[job_name]_jenkins_build_[build_number]', scannerName: 'qualys-scanner', useHost: true, vulnsTimeout: '60*2'
             }
          }
       }
