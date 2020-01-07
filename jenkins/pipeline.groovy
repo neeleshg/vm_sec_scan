@@ -52,7 +52,7 @@ pipeline {
             script {
                 def ami_id = sh (script: "grep us-east-1 /tmp/36_packer_build.log|awk -F': ' '{print \$2}'", returnStdout: true).trim()
                 echo "AMI ID is ${ami_id}"
-                sh("cd tf-deploy && terraform destroy -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}'")
+                sh("cd tf-deploy && terraform destroy -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}'")
             }
          }
       }
