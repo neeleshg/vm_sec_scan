@@ -10,6 +10,7 @@ variable "vpc_id" {}
 variable "subnet_id" {}
 variable "ec2_key_name" {}
 variable "scanner_sg_id" {}
+variable "private_instance_ip" {}
 
 resource "aws_security_group" "test" {
   name        = "test-sg"
@@ -38,7 +39,7 @@ resource "aws_security_group_rule" "test_ingress_scanner" {
 
 resource "aws_network_interface" "foo" {
   subnet_id   = var.subnet_id
-  private_ips = ["172.31.11.105"]
+  private_ips = [var.private_instance_ip]
 
   tags = {
     Name = "primary_network_interface"
@@ -61,7 +62,6 @@ resource "aws_instance" "test" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.test.id]
-  associate_public_ip_address = true
   key_name                    = var.ec2_key_name
   network_interface {
     network_interface_id = aws_network_interface.foo.id
