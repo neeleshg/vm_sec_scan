@@ -42,6 +42,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: "${qualys_creds_id}", passwordVariable: 'pass', usernameVariable: 'user')]) {
                   sh("curl -H 'X-Requested-With: Curl Sample' -u '$user:$pass' -X 'POST' -d 'action=add&enable_vm=1&ips=${instance_pub_ip}' 'https://${qualys_url}/api/2.0/fo/asset/ip/'")
                 }
+                // Paste your Command output from Qualys VM Plugin Here. Please make sure not to change apiServer: "https://${qualys_url}" | hostIp: "${instance_pub_ip}" | optionProfile: "${qualys_option_profile_name}" 
                   qualysVulnerabilityAnalyzer apiServer: "https://${qualys_url}", bySev: 1, credsId: 'Qualys - Free Trial', evaluatePotentialVulns: true, failByPci: true, failBySev: true, hostIp: "${instance_pub_ip}", optionProfile: "${qualys_option_profile_name}", pollingInterval: '2', scanName: '[job_name]_jenkins_build_[build_number]', scannerName: 'External', useHost: true, vulnsTimeout: '60*2'
             }
          }
