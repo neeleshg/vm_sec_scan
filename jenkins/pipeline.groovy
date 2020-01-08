@@ -24,7 +24,7 @@ pipeline {
          steps {
             // Provision Instance
             script {
-                def ami_id = sh (script: "grep us-east-1 /tmp/72_packer_build.log|awk -F': ' '{print \$2}'", returnStdout: true).trim()
+                def ami_id = sh (script: "grep us-east-1 /tmp/${env.BUILD_NUMBER}_packer_build.log|awk -F': ' '{print \$2}'", returnStdout: true).trim()
                 echo "AMI ID is ${ami_id}"
                 sh("cd tf-deploy && terraform init")
                 sh("cd tf-deploy && terraform apply -auto-approve -var 'ami_id=${ami_id}' -var 'instance_type=${instance_type}' -var 'vpc_id=${vpc_id}' -var 'subnet_id=${subnet_id}' -var 'ec2_key_name=${ec2_key_name}' -var 'scanner_ip_ranges=${scanner_ip_ranges}' >/tmp/${env.BUILD_NUMBER}_tf_deploy.log")
